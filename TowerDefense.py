@@ -11,7 +11,13 @@ pygame.display.set_caption("TOWER DEFENSE")
 gameIcon = pygame.image.load('Icon.png')
 pygame.display.set_icon(gameIcon)
 
-# 
+# regulated dot production
+# different types of turrets
+# turret radiuses
+# different dots
+# main menu
+# more maps/ map control
+
 
 class MovingTurret(object):
     def __init__(self):
@@ -21,8 +27,10 @@ class MovingTurret(object):
         self.pos = pygame.mouse.get_pos()
         pygame.draw.rect(gameDisplay,(255,0,0), (pos[0],pos[1],30,30))
 
+##### TURRET #####
+
 class Turret(object):
-    def __init__(self, game, pos=(0,0), cost=100, speed=3, damage=8, color=(255,0,0), killCount=0):
+    def __init__(self, game, pos=(0,0), time=0, cost=100, speed=3, damage=8, color=(255,0,0), killCount=0):
         self.pos = pos
         self.cost = cost
         self.speed = speed
@@ -32,8 +40,8 @@ class Turret(object):
         self.killCount = killCount
         self.bList = []
         
-    def display(self,pos):
-        pygame.draw.rect(gameDisplay,(255,0,0), (pos[0],pos[1],30,30))
+    def display(self):
+        pygame.draw.rect(gameDisplay,(255,0,0), (self.pos[0],self.pos[1],30,30))
 
     def fire(self):
         b = Bullet((self.pos[0]+15,self.pos[1]+15), 0, 3, self)
@@ -66,6 +74,8 @@ class MachineGun(Turret):
         self.damage = damage
         self.color = color
         self.killCount = killCount
+
+##### BULLET #####
 
 class Bullet(object):
     def __init__(self, pos=(0,0), direction = 0, speed = 1, turret=None):
@@ -100,6 +110,7 @@ class Bullet(object):
             self.turret.deleteBullet(self)
 
     def display(self):
+        self.updatePos()
         if 0 < self.pos[0] < 800 and 0 < self.pos[1] < 600: pygame.draw.circle(gameDisplay, (200,200,0), (round(self.pos[0]), round(self.pos[1])), 5)
         else: self.turret.deleteBullet(self)
 
@@ -111,7 +122,8 @@ class Bullet(object):
         return self.direction
     def getTurret(self):
         return self.turret
-        
+
+##### DOT ######
                          
 class Dot(object):
     def __init__(self,game, points,speed=1,radius = 15):
@@ -235,7 +247,7 @@ class Game(object):
     def gameLoop(self):
         done = False
         parameter = list(self.points)
-        c = 0
+        time = 0
         turret = False
         pointList = self.points[:]
         while done == False:
@@ -273,9 +285,9 @@ class Game(object):
             if c % 300 == 0: self.dList.append(Dot(self, parameter, 1, 9))
             pygame.draw.lines(gameDisplay,(255,153,51),False,pointList,10)
             for thing in self.tList:
-                thing.display(thing.pos)
+                thing.display()
+                
                 for bullet in thing.bList:
-                    bullet.updatePos()
                     bullet.display()
             for dot in self.dList:
                 if dot is not None:
@@ -286,7 +298,8 @@ class Game(object):
             displayWallet("$" + str(self.wallet))
             pygame.draw.rect(gameDisplay,(255,255,0), (770,285,30,30))
             pygame.display.update()
-            c += 1
+            time += 1
+            if time == 25200: time = 0
             if self.lives == 0: return
 
     
