@@ -193,6 +193,13 @@ def displayScore(text):
     TextRect.center = ((740),(25))
     gameDisplay.blit(TextSurf, TextRect)
 
+def displayWallet(text):
+    font = pygame.font.Font('freesansbold.ttf',20)
+    TextSurf = font.render(text,True,(127,127,127))
+    TextRect = TextSurf.get_rect()
+    TextRect.center = ((740),(50))
+    gameDisplay.blit(TextSurf, TextRect)
+
 def displayLoss():
     c = 0
     gameDisplay.fill((0,0,0))
@@ -216,9 +223,12 @@ class Game(object):
         self.points =((10,50),(600,50),(600,550),(100,550),(100,150),(400,150),(400,400),(200,400),(200,200),(300,300),(500,300),(300,100),(700,100),(700,570),(50,570),(320,345))
         self.dList = []
         self.tList = []
+        self.wallet = 100
+        self.inflation = 1
 
     def deleteDot(self, dot):
         self.dList.remove(dot)
+        self.wallet += 25
 
     def gameLoop(self):
         done = False
@@ -229,6 +239,7 @@ class Game(object):
         c = 0
         while done == False:
             gameDisplay.fill((0,0,0))
+            self.inflation = (len(self.tList) // 3)  + 1
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -251,10 +262,11 @@ class Game(object):
                         turret = False
                         t1 = Turret(self, pygame.mouse.get_pos())
                         self.tList.append(t1)
-                    if 800 > event.pos[0] > 770 and 285 < event.pos[1] < 315:
+                        self.wallet -= 100 * self.inflation
+                    if 800 > event.pos[0] > 770 and 285 < event.pos[1] < 315 and self.wallet >= 100 * self.inflation:
                         t1 = MovingTurret()
                         turret = True
-            if c % 30 == 0: self.dList.append(Dot(self, parameter, .5,30))
+            if c % 300 == 0: self.dList.append(Dot(self, parameter, .5,30))
             if turret == True:
                 t1.display(pygame.mouse.get_pos())
                     
@@ -270,6 +282,7 @@ class Game(object):
                         self.dList.remove(dot)
                         self.lives -= 1
             displayScore(str(self.lives) + " lives")
+            displayWallet("$" + str(self.wallet))
             pygame.draw.rect(gameDisplay,(255,255,0), (770,285,30,30))
             pygame.display.update()
             c += 1
