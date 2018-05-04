@@ -30,15 +30,19 @@ class MovingTurret(object):
 ##### TURRET #####
 
 class Turret(object):
-    def __init__(self, game, pos=(0,0), time=0, cost=100, speed=3, damage=8, color=(255,0,0), killCount=0):
+    def __init__(self, game, pos=(0,0), cost=100, speed=3, damage=8, color=(255,0,0), killCount=0):
         self.pos = pos
         self.cost = cost
         self.speed = speed
         self.damage = damage
         self.game = game
         self.color = color
+        self.radius = 200
         self.killCount = killCount
         self.bList = []
+        self.reloadTime = 300
+        self.time = self.game.time % self.reloadTime
+        self.born = self.game.time
         
     def display(self):
         pygame.draw.rect(gameDisplay,(255,0,0), (self.pos[0],self.pos[1],30,30))
@@ -105,6 +109,7 @@ class Bullet(object):
         y = self.speed * math.sin(self.direction)
         x = self.speed * math.cos(self.direction)
         self.pos = (self.pos[0] + x, self.pos[1] + y)
+        if (((self.turret.pos[0]-self.pos[0])**2) + ((self.turret.pos[1]-self.pos[1])**2)) >= self.turret.radius ** 2: self.turret.deleteBullet(self)
         if dot is not None and ((self.pos[0]-dot.pos[0])**2) + ((self.pos[1]-dot.pos[1])**2) <= dot.radius ** 2:
             dot.radius -= 3
             self.turret.deleteBullet(self)
@@ -239,6 +244,7 @@ class Game(object):
         self.tList = []
         self.wallet = 100
         self.inflation = 1
+        self.time = 0
 
     def deleteDot(self, dot):
         self.dList.remove(dot)
@@ -247,7 +253,6 @@ class Game(object):
     def gameLoop(self):
         done = False
         parameter = list(self.points)
-        time = 0
         turret = False
         pointList = self.points[:]
         while done == False:
@@ -282,11 +287,11 @@ class Game(object):
 
             if turret == True:
                 t1.display(pygame.mouse.get_pos())
-            if c % 300 == 0: self.dList.append(Dot(self, parameter, 1, 9))
+            if self.time % 300 == 0: self.dList.append(Dot(self, parameter, 1, 9))
             pygame.draw.lines(gameDisplay,(255,153,51),False,pointList,10)
             for thing in self.tList:
                 thing.display()
-                
+                if self.time % thing.reloadTime == thing.time: thing.fire()
                 for bullet in thing.bList:
                     bullet.display()
             for dot in self.dList:
@@ -298,8 +303,8 @@ class Game(object):
             displayWallet("$" + str(self.wallet))
             pygame.draw.rect(gameDisplay,(255,255,0), (770,285,30,30))
             pygame.display.update()
-            time += 1
-            if time == 25200: time = 0
+            self.time += 1
+            if self.time == 25200: time = 0
             if self.lives == 0: return
 
     
