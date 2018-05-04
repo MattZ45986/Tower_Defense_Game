@@ -11,6 +11,8 @@ pygame.display.set_caption("TOWER DEFENSE")
 gameIcon = pygame.image.load('Icon.png')
 pygame.display.set_icon(gameIcon)
 
+# 
+
 class MovingTurret(object):
     def __init__(self):
         self.pos = (0,0)
@@ -233,10 +235,9 @@ class Game(object):
     def gameLoop(self):
         done = False
         parameter = list(self.points)
-
+        c = 0
         turret = False
         pointList = self.points[:]
-        c = 0
         while done == False:
             gameDisplay.fill((0,0,0))
             self.inflation = (len(self.tList) // 3)  + 1
@@ -246,7 +247,7 @@ class Game(object):
                     quit()
                 elif event.type == pygame.KEYDOWN:
                     parameter = list(self.points)
-                    if event.key == pygame.K_1: self.dList.append(Dot(self,parameter,.1))
+                    if   event.key == pygame.K_1: self.dList.append(Dot(self,parameter,.1))
                     elif event.key == pygame.K_2: self.dList.append(Dot(self,parameter,.2))
                     elif event.key == pygame.K_3: self.dList.append(Dot(self,parameter,.3))
                     elif event.key == pygame.K_4: self.dList.append(Dot(self,parameter,.4))
@@ -266,10 +267,10 @@ class Game(object):
                     if 800 > event.pos[0] > 770 and 285 < event.pos[1] < 315 and self.wallet >= 100 * self.inflation:
                         t1 = MovingTurret()
                         turret = True
-            if c % 300 == 0: self.dList.append(Dot(self, parameter, .5,30))
+
             if turret == True:
                 t1.display(pygame.mouse.get_pos())
-                    
+            if c % 300 == 0: self.dList.append(Dot(self, parameter, 1, 9))
             pygame.draw.lines(gameDisplay,(255,153,51),False,pointList,10)
             for thing in self.tList:
                 thing.display(thing.pos)
