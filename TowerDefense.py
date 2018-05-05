@@ -1,4 +1,4 @@
-# Tower Defense
+# Tower Defense, update 2.0
 
 import pygame
 import random
