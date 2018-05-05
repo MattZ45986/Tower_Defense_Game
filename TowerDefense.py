@@ -136,7 +136,7 @@ class Bullet(object):
 ##### DOT ######
                          
 class Dot(object):
-    def __init__(self,game, points,speed=1,radius = 15):
+    def __init__(self,game, points,speed=1,radius = 9):
         self.points = points
         self.game = game
         self.point = 0
@@ -240,11 +240,38 @@ def shoot(turrets):
     for turret in turrets:
         turret.fire()
 
+class Round(object):
+    def __init__(self,roundList, num):
+        self.roundList = roundList
+        self.num = num
+        x = 'self.roundList.getRound' + str(self.num)
+        self.list = eval(x+ "()")
+        self.inflation = 1
+
+    def getList(self):
+        return self.list
+
+class RoundList(object):
+    def __init__(self):
+        self.length = 20
+
+    def getRound1(self):
+        list1 = list(range(100,1100, 200))
+        list2 = list(range(1500, 2000, 100))
+        list3 = list(range(2100, 3000, 60))
+        return list1+list2+list3
+        
+        
+    
+
 class Game(object):
 
     def __init__(self):
         self.lives = 100
         self.points =((10,50),(600,50),(600,550),(100,550),(100,150),(400,150),(400,400),(200,400),(200,200),(300,300),(500,300),(300,100),(700,100),(700,570),(50,570),(320,345))
+        self.roundList = RoundList()
+        self.rounds = [Round(self.roundList, 1)]
+        self.round = 0
         self.dList = []
         self.tList = []
         self.wallet = 100
@@ -289,10 +316,8 @@ class Game(object):
                     if 800 > event.pos[0] > 770 and 285 < event.pos[1] < 315 and self.wallet >= 100 * self.inflation:
                         t1 = MovingTurret()
                         turret = True
-
-            if turret == True:
-                t1.display(pygame.mouse.get_pos())
-            if self.time % 300 == 0: self.dList.append(Dot(self, parameter, 1, 9))
+            if self.time in self.rounds[self.round].getList(): self.dList.append(Dot(self, parameter))
+            if turret == True: t1.display(pygame.mouse.get_pos())
             pygame.draw.lines(gameDisplay,(255,153,51),False,pointList,10)
             for thing in self.tList:
                 thing.display()
