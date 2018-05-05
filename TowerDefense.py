@@ -12,8 +12,8 @@ gameIcon = pygame.image.load('Icon.png')
 pygame.display.set_icon(gameIcon)
 
 # regulated dot production
-# different types of turrets
-# turret radiuses
+# different types of turrets/costs
+# round numbers
 # different dots
 # main menu
 # more maps/ map control
@@ -96,6 +96,9 @@ class Bullet(object):
             if  d < dist:
                 target = dot
                 dist = d
+        if dist > self.turret.radius:
+            self.turret.deleteBullet(self)
+            return None
         return target
 
     def updatePos(self):
@@ -105,7 +108,9 @@ class Bullet(object):
             elif (dot.pos[1]-self.pos[1]) > 0: self.direction = math.radians(90)
             else: self.direction = math.radians(270)
             if (dot.pos[0]-self.pos[0]) < 0: self.direction += math.pi
-        else: self.turret.deleteBullet(self)
+        else:
+            self.turret.deleteBullet(self)
+            return
         y = self.speed * math.sin(self.direction)
         x = self.speed * math.cos(self.direction)
         self.pos = (self.pos[0] + x, self.pos[1] + y)
