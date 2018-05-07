@@ -9,11 +9,12 @@ pygame.init()
 gameDisplay = pygame.display.set_mode((800,600))
 pygame.display.set_caption("TOWER DEFENSE")
 gameIcon = pygame.image.load('Icon.png')
+mappy = pygame.image.load('Map.png')
 pygame.display.set_icon(gameIcon)
 
 # regulated dot production
 # different types of turrets/costs
-# round numbers
+# round numbers + pause/play
 # different dots
 # main menu
 # more maps/ map control
@@ -40,7 +41,7 @@ class Turret(object):
         self.radius = 200
         self.killCount = killCount
         self.bList = []
-        self.reloadTime = 300
+        self.reloadTime = 100
         self.time = self.game.time % self.reloadTime
         self.born = self.game.time
         
@@ -49,7 +50,8 @@ class Turret(object):
 
     def fire(self):
         b = Bullet((self.pos[0]+15,self.pos[1]+15), 0, 3, self)
-        self.bList.append(b)
+        if b.findTarget() != None: self.bList.append(b)
+        else: b = None
 
     def deleteBullet(self, bullet):
         try:
@@ -82,7 +84,7 @@ class MachineGun(Turret):
 ##### BULLET #####
 
 class Bullet(object):
-    def __init__(self, pos=(0,0), direction = 0, speed = 1, turret=None):
+    def __init__(self, pos=(0,0), direction = 0, speed = 2, turret=None):
         self.pos = pos
         self.speed = speed
         self.turret = turret
@@ -136,7 +138,7 @@ class Bullet(object):
 ##### DOT ######
                          
 class Dot(object):
-    def __init__(self,game, points,speed=1,radius = 9):
+    def __init__(self,game, points,speed=2,radius = 9):
         self.points = points
         self.game = game
         self.point = 0
@@ -240,6 +242,8 @@ def shoot(turrets):
     for turret in turrets:
         turret.fire()
 
+##### ROUND #####
+
 class Round(object):
     def __init__(self,roundList, num):
         self.roundList = roundList
@@ -268,7 +272,7 @@ class Game(object):
 
     def __init__(self):
         self.lives = 100
-        self.points =((10,50),(600,50),(600,550),(100,550),(100,150),(400,150),(400,400),(200,400),(200,200),(300,300),(500,300),(300,100),(700,100),(700,570),(50,570),(320,345))
+        self.points =((10,50),(600,50),(600,550),(100,550),(100,150),(400,150),(400,450),(200,450),(200,300),(300,300))
         self.roundList = RoundList()
         self.rounds = [Round(self.roundList, 1)]
         self.round = 0
@@ -288,7 +292,7 @@ class Game(object):
         turret = False
         pointList = self.points[:]
         while done == False:
-            gameDisplay.fill((0,0,0))
+            gameDisplay.blit(mappy, (0,0))
             self.inflation = (len(self.tList) // 3)  + 1
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -318,7 +322,6 @@ class Game(object):
                         turret = True
             if self.time in self.rounds[self.round].getList(): self.dList.append(Dot(self, parameter))
             if turret == True: t1.display(pygame.mouse.get_pos())
-            pygame.draw.lines(gameDisplay,(255,153,51),False,pointList,10)
             for thing in self.tList:
                 thing.display()
                 if self.time % thing.reloadTime == thing.time: thing.fire()
