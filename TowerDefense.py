@@ -258,12 +258,24 @@ class Round(object):
 class RoundList(object):
     def __init__(self):
         self.length = 20
+        self.round1 = self.setRound1()
 
-    def getRound1(self):
+    def setRound1(self):
         list1 = list(range(100,1100, 200))
         list2 = list(range(1500, 2000, 100))
         list3 = list(range(2100, 3000, 60))
-        return list1+list2+list3
+        list4 = []
+        start = 3000
+        for i in range(100):
+            list4.append(list(range(start, start+1000, 200)))
+            start += 1200
+        return list1+list2+list3+list4
+                              
+    def getRound1(self):
+        return self.round1
+                              
+                              
+                              
         
         
     
