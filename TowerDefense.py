@@ -94,7 +94,7 @@ class Bullet(object):
         target = None
         dist = 1000
         for dot in self.turret.game.dList:
-            d = math.sqrt(((dot.pos[0]-self.pos[0]) ** 2) + ((dot.pos[1]-self.pos[1]) ** 2))
+            d = math.sqrt(((dot.pos[0]-self.turret.pos[0]) ** 2) + ((dot.pos[1]-self.turret.pos[1]) ** 2))
             if  d < dist:
                 target = dot
                 dist = d
@@ -298,7 +298,7 @@ class Game(object):
             gameDisplay.fill((0,0,0))
             #gameDisplay.blit(mappy, (0,0))
             for point in self.points:
-                pygame.draw.circle(gameDisplay, (0,255,255), point, 2)
+                pygame.draw.circle(gameDisplay, (0,255,255), (point[0]+1,point[1]+1), 3)
             self.inflation = (len(self.tList) // 3)  + 1
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -327,7 +327,7 @@ class Game(object):
                         t1 = MovingTurret()
                         turret = True
             if self.time in self.rounds[self.round].getList(): self.dList.append(Dot(self, parameter))
-            pygame.draw.lines(gameDisplay, (0,255,255), False, pointList, 5)
+            pygame.draw.lines(gameDisplay, (0,255,255), False, pointList, 6)
             if turret == True: t1.display(pygame.mouse.get_pos())
             for thing in self.tList:
                 thing.display()
