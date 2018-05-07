@@ -288,11 +288,17 @@ class Game(object):
 
     def gameLoop(self):
         done = False
+        clock = pygame.time.Clock()
         parameter = list(self.points)
         turret = False
         pointList = self.points[:]
         while done == False:
-            gameDisplay.blit(mappy, (0,0))
+            print(str(clock.get_fps()))
+            clock.tick()
+            gameDisplay.fill((0,0,0))
+            #gameDisplay.blit(mappy, (0,0))
+            for point in self.points:
+                pygame.draw.circle(gameDisplay, (0,255,255), point, 2)
             self.inflation = (len(self.tList) // 3)  + 1
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -321,6 +327,7 @@ class Game(object):
                         t1 = MovingTurret()
                         turret = True
             if self.time in self.rounds[self.round].getList(): self.dList.append(Dot(self, parameter))
+            pygame.draw.lines(gameDisplay, (0,255,255), False, pointList, 5)
             if turret == True: t1.display(pygame.mouse.get_pos())
             for thing in self.tList:
                 thing.display()
