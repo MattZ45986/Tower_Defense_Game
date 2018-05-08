@@ -9,7 +9,6 @@ pygame.init()
 gameDisplay = pygame.display.set_mode((800,600))
 pygame.display.set_caption("TOWER DEFENSE")
 gameIcon = pygame.image.load('Icon.png')
-mappy = pygame.image.load('Map.png')
 pygame.display.set_icon(gameIcon)
 
 # regulated dot production
@@ -21,8 +20,9 @@ pygame.display.set_icon(gameIcon)
 
 
 class MovingTurret(object):
-    def __init__(self):
+    def __init__(self, kind):
         self.pos = (0,0)
+        self.kind = kind
         
     def display(self,pos):
         self.pos = pygame.mouse.get_pos()
@@ -46,7 +46,7 @@ class Turret(object):
         self.born = self.game.time
         
     def display(self):
-        pygame.draw.rect(gameDisplay,(255,0,0), (self.pos[0],self.pos[1],30,30))
+        pygame.draw.rect(gameDisplay,self.color, (self.pos[0],self.pos[1],30,30))
 
     def fire(self):
         b = Bullet((self.pos[0]+15,self.pos[1]+15), 0, 3, self)
@@ -73,13 +73,19 @@ class Turret(object):
         return self.killCount
 
 class MachineGun(Turret):
-    def __init__(self, pos=(0,0), cost=100, speed=10, damage=3, color=(255,0,0), killCount=0):
+    def __init__(self,game, pos):
         self.pos = pos
-        self.cost = cost
-        self.speed = speed
-        self.damage = damage
-        self.color = color
-        self.killCount = killCount
+        self.game = game
+        self.speed = 10
+        self.cost = 150
+        self.damage = 3
+        self.color = (255,165,0)
+        self.radius = 175
+        self.killCount = 0
+        self.bList = []
+        self.reloadTime = 25
+        self.time = self.game.time % self.reloadTime
+        self.born = self.game.time
 
 ##### BULLET #####
 
@@ -332,11 +338,16 @@ class Game(object):
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if turret == True:
                         turret = False
-                        t1 = Turret(self, pygame.mouse.get_pos())
+                        kind = t1.kind
+                        if kind == "basic": t1 = Turret(self, pygame.mouse.get_pos())
+                        elif kind == "machineGun":  t1 = MachineGun(self, pygame.mouse.get_pos())
                         self.tList.append(t1)
-                        self.wallet -= 100 * self.inflation
+                        self.wallet -= t1.getCost() * self.inflation
                     if 800 > event.pos[0] > 770 and 285 < event.pos[1] < 315 and self.wallet >= 100 * self.inflation:
-                        t1 = MovingTurret()
+                        t1 = MovingTurret("basic")
+                        turret = True
+                    elif 800 > event.pos[0] > 770 and 315 < event.pos[1] < 345 and self.wallet >= 150 * self.inflation:
+                        t1 = MovingTurret("machineGun")
                         turret = True
             if self.time in self.rounds[self.round].getList(): self.dList.append(Dot(self, parameter))
             pygame.draw.lines(gameDisplay, (0,255,255), False, pointList, 6)
@@ -354,6 +365,7 @@ class Game(object):
             displayScore(str(self.lives) + " lives")
             displayWallet("$" + str(self.wallet))
             pygame.draw.rect(gameDisplay,(255,255,0), (770,285,30,30))
+            pygame.draw.rect(gameDisplay,(255,0,255), (770,315,30,30))
             pygame.display.update()
             self.time += 1
             if self.time == 25200: time = 0
