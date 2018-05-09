@@ -122,6 +122,24 @@ class Sniper(Turret):
         self.time = self.game.time % self.reloadTime
         self.born = self.game.time
 
+class EMP(Turret):
+    def __init__(self,game, pos):
+        self.pos = pos
+        self.game = game
+        self.speed = 1
+        self.cost = 300
+        self.damage = 0
+        self.color = (94,43,136)
+        self.radius = 1000
+        self.killCount = 0
+        self.bList = []
+        self.reloadTime = 175
+        self.time = self.game.time % self.reloadTime
+        self.born = self.game.time
+
+    def fire(self):
+        pygame.draw.circle(gameDisplay, (160,200,240), self.pos, 50)
+
 ##### BULLET #####
 
 class Bullet(object):
@@ -136,7 +154,7 @@ class Bullet(object):
         target = None
         dist = 1000
         for dot in self.turret.game.dList:
-            d = math.sqrt(((dot.pos[0]-self.turret.pos[0]) ** 2) + ((dot.pos[1]-self.turret.pos[1]) ** 2))
+            d = math.sqrt(((dot.pos[0]-self.turret.getPos()[0]) ** 2) + ((dot.pos[1]-self.turret.getPos()[1]) ** 2))
             if  d < dist:
                 target = dot
                 dist = d
@@ -180,16 +198,14 @@ class Bullet(object):
 ##### DOT ######
                          
 class Dot(object):
-    def __init__(self,game, points,speed=2,radius = 9):
+    def __init__(self,game, points):
         self.points = points
         self.game = game
         self.point = 0
-        if radius < 6: radius = 6
-        if radius > 60: radius = 60
-        if radius % 3 != 0: radius -= radius % 3
-        self.radius = radius
+        self.radius = 15
         self.pos = list(self.points[self.point])
-        self.speed = speed
+        self.speed = 2
+        self.color = (0,255,0)
         
 
     def display(self):
@@ -213,7 +229,7 @@ class Dot(object):
                 x = self.speed * xD * (1/math.sqrt(yD ** 2 + xD ** 2))
             self.pos[0] += x
             self.pos[1] += y
-        pygame.draw.circle(gameDisplay, (0,255,0), [int(round(self.pos[0])),int(round(self.pos[1]))],self.radius)
+        pygame.draw.circle(gameDisplay, self.color, [int(round(self.pos[0])),int(round(self.pos[1]))],self.radius)
         xNow = round(self.pos[0])
         xGoal = self.points[self.point + 1][0]
         yNow = round(self.pos[1])
@@ -226,6 +242,27 @@ class Dot(object):
         return self.speed
     def getRadius(self):
         return self.radius
+    def getPos(self):
+        return self.pos
+
+class FastDot(Dot):
+    def __init__(self,game, points):
+        self.points = points
+        self.game = game
+        self.point = 0
+        self.radius = 12
+        self.pos = list(self.points[self.point])
+        self.speed = 4
+        self.color = (240,33,245)
+class StrongDot(Dot):
+    def __init__(self,game, points):
+        self.points = points
+        self.game = game
+        self.point = 0
+        self.radius = 21
+        self.pos = list(self.points[self.point])
+        self.speed = .5
+        self.color = (37,119,146)
 
 def intro():
     done = False
@@ -393,7 +430,10 @@ class Game(object):
                     elif 800 > event.pos[0] > 770 and 375 < event.pos[1] < 405 and self.wallet >= 150 * self.inflation:
                         t1 = MovingTurret("sniper")
                         turret = True
-            if self.time in self.rounds[self.round].getList(): self.dList.append(Dot(self, parameter,2,15))
+            if self.time in self.rounds[self.round].getList():
+                self.dList.append(Dot(self, parameter))
+                self.dList.append(FastDot(self, parameter))
+                self.dList.append(StrongDot(self, parameter))
             pygame.draw.lines(gameDisplay, (0,255,255), False, pointList, 6)
             if turret == True: t1.display(pygame.mouse.get_pos())
             for thing in self.tList:
