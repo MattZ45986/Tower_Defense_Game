@@ -27,6 +27,7 @@ class MovingTurret(object):
         elif kind == "machineGun": self.color = (255,165,0)
         elif kind == "destroyer": self.color = (18,77,141)
         elif kind == "sniper": self.color = (9,98,20)
+        elif kind == "EMP": self.color = (94,43,136)
         else: self.color = (126,126,126)
         
     def display(self,pos):
@@ -98,7 +99,7 @@ class Destroyer(Turret):
         self.game = game
         self.speed = 2
         self.cost = 200
-        self.damage = 12
+        self.damage = 21
         self.color = (18,77,141)
         self.radius = 300
         self.killCount = 0
@@ -130,15 +131,22 @@ class EMP(Turret):
         self.cost = 300
         self.damage = 0
         self.color = (94,43,136)
-        self.radius = 1000
+        self.radius = 200
         self.killCount = 0
         self.bList = []
-        self.reloadTime = 175
+        self.dList = []
+        self.reloadTime = 300
         self.time = self.game.time % self.reloadTime
         self.born = self.game.time
 
     def fire(self):
-        pygame.draw.circle(gameDisplay, (160,200,240), self.pos, 50)
+        pygame.draw.circle(gameDisplay, (160,200,240), (self.pos[0]+15,self.pos[1]+15), 50)
+        pygame.draw.circle(gameDisplay, (160,200,240), (self.pos[0]+15,self.pos[1]+15), 50)
+        pygame.draw.circle(gameDisplay, (160,200,240), (self.pos[0]+15,self.pos[1]+15), 50)
+        for dot in self.game.dList:
+            if ((dot.getPos()[0]-self.pos[0])**2) + ((dot.getPos()[1]-self.pos[1])**2) < self.radius**2:
+                dot.frozen = True
+                self.dList.append((self.game.time + 150, dot))
 
 ##### BULLET #####
 
@@ -206,9 +214,10 @@ class Dot(object):
         self.pos = list(self.points[self.point])
         self.speed = 2
         self.color = (0,255,0)
+        self.frozen = False
         
 
-    def display(self):
+    def updatePos(self):
         if self.radius < 6:
             self.game.deleteDot(self)
             return
@@ -229,7 +238,6 @@ class Dot(object):
                 x = self.speed * xD * (1/math.sqrt(yD ** 2 + xD ** 2))
             self.pos[0] += x
             self.pos[1] += y
-        pygame.draw.circle(gameDisplay, self.color, [int(round(self.pos[0])),int(round(self.pos[1]))],self.radius)
         xNow = round(self.pos[0])
         xGoal = self.points[self.point + 1][0]
         yNow = round(self.pos[1])
@@ -238,12 +246,20 @@ class Dot(object):
             self.point += 1
             self.pos = list(self.points[self.point])
 
+    def display(self):
+        if self.radius < 6:
+            self.game.deleteDot(self)
+            return
+        pygame.draw.circle(gameDisplay, self.color, [int(round(self.pos[0])),int(round(self.pos[1]))],self.radius)
+
     def getSpeed(self):
         return self.speed
     def getRadius(self):
         return self.radius
     def getPos(self):
         return self.pos
+    def getMove(self):
+        return not self.frozen
 
 class FastDot(Dot):
     def __init__(self,game, points):
@@ -254,6 +270,7 @@ class FastDot(Dot):
         self.pos = list(self.points[self.point])
         self.speed = 4
         self.color = (240,33,245)
+        self.frozen = False
 class StrongDot(Dot):
     def __init__(self,game, points):
         self.points = points
@@ -263,6 +280,7 @@ class StrongDot(Dot):
         self.pos = list(self.points[self.point])
         self.speed = .5
         self.color = (37,119,146)
+        self.frozen = False
 
 def intro():
     done = False
@@ -374,7 +392,7 @@ class Game(object):
         self.time = 0
 
     def deleteDot(self, dot):
-        self.dList.remove(dot)
+        if dot in self.dList: self.dList.remove(dot)
         self.wallet += 25
 
     def gameLoop(self):
@@ -416,6 +434,7 @@ class Game(object):
                         elif kind == "machineGun":  t1 = MachineGun(self, pygame.mouse.get_pos())
                         elif kind == "destroyer": t1 = Destroyer(self, pygame.mouse.get_pos())
                         elif kind == "sniper": t1 = Sniper(self, pygame.mouse.get_pos())
+                        elif kind == "EMP": t1 = EMP(self, pygame.mouse.get_pos())
                         self.tList.append(t1)
                         self.wallet -= t1.getCost() * self.inflation
                     if 800 > event.pos[0] > 770 and 285 < event.pos[1] < 315 and self.wallet >= 100 * self.inflation:
@@ -430,6 +449,9 @@ class Game(object):
                     elif 800 > event.pos[0] > 770 and 375 < event.pos[1] < 405 and self.wallet >= 150 * self.inflation:
                         t1 = MovingTurret("sniper")
                         turret = True
+                    elif 800 > event.pos[0] > 770 and 405 < event.pos[1] < 435 and self.wallet >= 300 * self.inflation:
+                        t1 = MovingTurret("EMP")
+                        turret = True
             if self.time in self.rounds[self.round].getList():
                 self.dList.append(Dot(self, parameter))
                 self.dList.append(FastDot(self, parameter))
@@ -441,17 +463,22 @@ class Game(object):
                 if self.time % thing.reloadTime == thing.time: thing.fire()
                 for bullet in thing.bList:
                     bullet.display()
+                if isinstance(thing, EMP):
+                    for pair in thing.dList:
+                        if pair[0] == self.time:
+                            pair[1].frozen = False
+                            thing.dList.remove(pair)
             for dot in self.dList:
                 if dot is not None:
-                    if dot.display():
-                        self.dList.remove(dot)
-                        self.lives -= 1
+                    if dot.getMove(): dot.updatePos()
+                    dot.display()
             displayScore(str(self.lives) + " lives")
             displayWallet("$" + str(self.wallet))
             pygame.draw.rect(gameDisplay,(255,255,0), (770,285,30,30))
             pygame.draw.rect(gameDisplay,(255,0,255), (770,315,30,30))
             pygame.draw.rect(gameDisplay,(0,0,255), (770,345,30,30))
             pygame.draw.rect(gameDisplay,(0,255,0), (770,375,30,30))
+            pygame.draw.rect(gameDisplay,(94,43,136), (770,405,30,30))
             pygame.display.update()
             self.time += 1
             if self.time == 25200: time = 0
