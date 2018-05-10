@@ -17,6 +17,8 @@ pygame.display.set_icon(gameIcon)
 # different dots
 # main menu
 # more maps/ map control
+# Create limit to # of towers
+# upgrades!
 
 
 class MovingTurret(object):
