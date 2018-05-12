@@ -20,6 +20,10 @@ pygame.display.set_icon(gameIcon)
 # Create limit to # of towers
 # upgrades!
 
+#File "C:\Users\Home\Documents\GitHub\Tower_Defense_Game\TowerDefense.py", line 426, in <listcomp>
+#    self.dotQueue = [y for x,y in self._rawQueue]
+#ValueError: not enough values to unpack (expected 2, got 1)
+
 
 class MovingTurret(object):
     def __init__(self, kind):
@@ -343,34 +347,70 @@ def shoot(turrets):
 
 ##### ROUND #####
 
-class Round(object):
-    def __init__(self,roundList, num):
-        self.roundList = roundList
-        self.num = num
-        x = 'self.roundList.getRound' + str(self.num)
-        self.list = eval(x+ "()")
-        self.inflation = 1
-
-    def getList(self):
-        return self.list
-
 class RoundList(object):
     def __init__(self):
         self.length = 20
-        self.round1 = self.setRound1()
 
-    def setRound1(self):
-        list1 = list(range(100,1100, 200))
-        list2 = list(range(1500, 2000, 100))
-        list3 = list(range(2100, 3000, 60))
-        list4 = []
-        start = 3000
-        for i in range(100):
-            list4 += list(range(start, start+1000, 50))
-            start += 1200
-        return list1+list2+list3+list4
-                              
+    def getList(self, num):
+        x = 'self.getRound' + str(num)
+        list1 = eval(x + "()")
+        return list1
+
+    def f(self,start,num,step=20):
+        list1 = []
+        for i in range(num):
+            list1 += ("f",(i*step) + start)
+        return list1
+    def s(self,start,num,step=30):
+        list1 = []
+        for i in range(num):
+            list1 += ("s",(i*step) + start)
+        return list1
+    def r(self,start,num,step=25):
+        list1 = []
+        for i in range(num):
+            list1 += ("r",(i*step) + start)
+        return list1
+             
     def getRound1(self):
+        return self.r(400,10)
+    def getRound2(self):
+        return self.r(800,15) + ("s", 1200)
+    def getRound3(self):
+        return self.f(1500,15) + self.r(1800, 10)
+    def getRound4(self):
+        return self.s(2000, 5) + self.r(2200, 15, 15)
+    def getRound5(self):
+        return self.round1
+    def getRound6(self):
+        return self.round1
+    def getRound7(self):
+        return self.round1
+    def getRound8(self):
+        return self.round1
+    def getRound9(self):
+        return self.round1
+    def getRound10(self):
+        return self.round1
+    def getRound11(self):
+        return self.round1
+    def getRound12(self):
+        return self.round1
+    def getRound13(self):
+        return self.round1
+    def getRound14(self):
+        return self.round1
+    def getRound15(self):
+        return self.round1
+    def getRound16(self):
+        return self.round1
+    def getRound17(self):
+        return self.round1
+    def getRound18(self):
+        return self.round1
+    def getRound19(self):
+        return self.round1
+    def getRound20(self):
         return self.round1
                               
                               
@@ -385,8 +425,11 @@ class Game(object):
         self.lives = 100
         self.points =((10,50),(600,50),(600,550),(100,550),(100,150),(400,150),(400,450),(200,450),(200,300),(300,300))
         self.roundList = RoundList()
-        self.rounds = [Round(self.roundList, 1)]
-        self.round = 0
+        self.round = 1
+        self._rawQueue = self.roundList.getList(self.round)
+        self.dotQueue = [y for x,y in self._rawQueue]
+        self.timeQueue = [x for x,y in self._rawQueue]
+        self.queueI = 0
         self.dList = []
         self.tList = []
         self.wallet = 100
@@ -397,6 +440,17 @@ class Game(object):
         if dot in self.dList: self.dList.remove(dot)
         self.wallet += 25
 
+    def displayWin(self):
+        c = 0
+        gameDisplay.fill((0,0,0))
+        while c < 1000:
+            font = pygame.font.Font('freesansbold.ttf',80)
+            TextSurf = font.render("YOU WIN!",True,(127,127,127))
+            TextRect = TextSurf.get_rect()
+            TextRect.center = ((400),(300))
+            gameDisplay.blit(TextSurf, TextRect)
+            pygame.display.update()
+            c += 1
     def gameLoop(self):
         done = False
         clock = pygame.time.Clock()
@@ -454,10 +508,17 @@ class Game(object):
                     elif 800 > event.pos[0] > 770 and 405 < event.pos[1] < 435 and self.wallet >= 300 * self.inflation:
                         t1 = MovingTurret("EMP")
                         turret = True
-            if self.time in self.rounds[self.round].getList():
-                self.dList.append(Dot(self, parameter))
-                self.dList.append(FastDot(self, parameter))
-                self.dList.append(StrongDot(self, parameter))
+            while self.time == self.timeQueue[self.queueI]:
+                if self.dotQueue[self.queueI] == "r": self.dList.append(Dot(self, parameter))
+                elif self.dotQueue[self.queueI] == "f": self.dList.append(FastDot(self, parameter))
+                elif self.dotQueue[self.queueI] == "s": self.dList.append(StrongDot(self, parameter))
+                self.queueI += 1
+                if self.queueI == len(self.timeQueue):
+                    self.round += 1
+                    if self.round == 5: self.displayWin()
+                    self._rawQueue = self.roundList.getList(self.round)
+                    self.dotQueue = [y for x,y in self._rawQueue]
+                    self.timeQueue = [x for x,y in self._rawQueue]
             pygame.draw.lines(gameDisplay, (0,255,255), False, pointList, 6)
             if turret == True: t1.display(pygame.mouse.get_pos())
             for thing in self.tList:
@@ -484,7 +545,7 @@ class Game(object):
             pygame.display.update()
             self.time += 1
             if self.time == 25200: time = 0
-            if self.lives == 0: return
+            if self.lives == 0: displayLoss()
 
     
 ## Main ##
@@ -492,7 +553,6 @@ class Game(object):
 intro()
 g = Game()
 g.gameLoop()
-displayLoss()
     
 
 pygame.quit()
