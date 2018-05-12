@@ -21,9 +21,6 @@ pygame.display.set_icon(gameIcon)
 # upgrades!
 
 
-# In the middle of round adjustment
-
-
 class MovingTurret(object):
     def __init__(self, kind):
         self.pos = (0,0)
@@ -364,68 +361,18 @@ class RoundList(object):
 
     def setRound1(self):
         list1 = list(range(100,1100, 200))
-        return list1
-    def setRound2(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound3(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound4(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound5(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound6(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound7(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound8(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound9(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound10(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound11(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound12(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-
-    def setRound13(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound14(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound15(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound16(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound17(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound18(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound19(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-    def setRound20(self):
-        list1 = list(range(100,1100, 200))
-        return list1
-
-        def getRound13(self):
-        return self.round1            
+        list2 = list(range(1500, 2000, 100))
+        list3 = list(range(2100, 3000, 60))
+        list4 = []
+        start = 3000
+        for i in range(100):
+            list4 += list(range(start, start+1000, 50))
+            start += 1200
+        return list1+list2+list3+list4
+                              
+    def getRound1(self):
+        return self.round1
+                              
                               
                               
         
@@ -438,12 +385,8 @@ class Game(object):
         self.lives = 100
         self.points =((10,50),(600,50),(600,550),(100,550),(100,150),(400,150),(400,450),(200,450),(200,300),(300,300))
         self.roundList = RoundList()
-        self.rounds = [Round(self.roundList, 1),Round(self.roundList, 2),Round(self.roundList, 3),Round(self.roundList, 4),Round(self.roundList, 5),Round(self.roundList, 6),Round(self.roundList, 7),Round(self.roundList, 8),Round(self.roundList, 9),Round(self.roundList, 10)
-                       Round(self.roundList, 11),Round(self.roundList, 12),Round(self.roundList, 13),Round(self.roundList, 14),Round(self.roundList, 15),Round(self.roundList, 16),Round(self.roundList, 17),Round(self.roundList, 18),Round(self.roundList, 19),Round(self.roundList, 20)]
+        self.rounds = [Round(self.roundList, 1)]
         self.round = 0
-        self.fDList = self.rounds[0].getList()
-        self.sDList = self.rounds[0].getList()
-        self.rDList = self.rounds[0].getList()
         self.dList = []
         self.tList = []
         self.wallet = 100
@@ -472,6 +415,19 @@ class Game(object):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     quit()
+                elif event.type == pygame.KEYDOWN:
+                    parameter = list(self.points)
+                    if   event.key == pygame.K_1: self.dList.append(Dot(self,parameter,.1))
+                    elif event.key == pygame.K_2: self.dList.append(Dot(self,parameter,.2))
+                    elif event.key == pygame.K_3: self.dList.append(Dot(self,parameter,.3))
+                    elif event.key == pygame.K_4: self.dList.append(Dot(self,parameter,.4))
+                    elif event.key == pygame.K_5: self.dList.append(Dot(self,parameter,.5))
+                    elif event.key == pygame.K_6: self.dList.append(Dot(self,parameter,.6))
+                    elif event.key == pygame.K_7: self.dList.append(Dot(self,parameter,.7))
+                    elif event.key == pygame.K_8: self.dList.append(Dot(self,parameter,.8))
+                    elif event.key == pygame.K_9: self.dList.append(Dot(self,parameter,.9))
+                    elif event.key == pygame.K_b: shoot(self.tList)
+                    else: self.dList.append(Dot(self,parameter,3))
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if turret == True:
                         turret = False
@@ -502,11 +458,6 @@ class Game(object):
                 self.dList.append(Dot(self, parameter))
                 self.dList.append(FastDot(self, parameter))
                 self.dList.append(StrongDot(self, parameter))
-            if self.time > self.rDList[len(self.rDList)-1] and self.time > self.sDList[len(self.sDList)-1] and self.time > self.fDList[len(self.fDList)-1]:
-                self.round += 1
-                self.fDList = self.rounds[self.round].getList()
-                self.sDList = self.rounds[self.round].getList()
-                self.rDList = self.rounds[self.round].getList()
             pygame.draw.lines(gameDisplay, (0,255,255), False, pointList, 6)
             if turret == True: t1.display(pygame.mouse.get_pos())
             for thing in self.tList:
