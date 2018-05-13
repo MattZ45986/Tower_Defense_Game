@@ -20,9 +20,8 @@ pygame.display.set_icon(gameIcon)
 # Create limit to # of towers
 # upgrades!
 
-#File "C:\Users\Home\Documents\GitHub\Tower_Defense_Game\TowerDefense.py", line 426, in <listcomp>
-#    self.dotQueue = [y for x,y in self._rawQueue]
-#ValueError: not enough values to unpack (expected 2, got 1)
+
+# Make a pause in between rounds
 
 
 class MovingTurret(object):
@@ -359,27 +358,33 @@ class RoundList(object):
     def f(self,start,num,step=20):
         list1 = []
         for i in range(num):
-            list1 += ("f",(i*step) + start)
+            list1.append(("f",(i*step) + start))
         return list1
     def s(self,start,num,step=30):
         list1 = []
         for i in range(num):
-            list1 += ("s",(i*step) + start)
+            list1.append(("s",(i*step) + start))
         return list1
     def r(self,start,num,step=25):
         list1 = []
         for i in range(num):
-            list1 += ("r",(i*step) + start)
+            list1.append(("r",(i*step) + start))
         return list1
              
     def getRound1(self):
-        return self.r(400,10)
+        return self.r(100,10)
     def getRound2(self):
-        return self.r(800,15) + ("s", 1200)
+        listy = self.r(800,15)
+        listy.append(("s", 1200))
+        return  listy
     def getRound3(self):
-        return self.f(1500,15) + self.r(1800, 10)
+        listy = self.f(1500,15)
+        listy += self.r(1800, 10)
+        return  listy
     def getRound4(self):
-        return self.s(2000, 5) + self.r(2200, 15, 15)
+        listy = self.s(2000, 5)
+        listy += self.r(2200, 15, 15)
+        return  listy
     def getRound5(self):
         return self.round1
     def getRound6(self):
@@ -427,12 +432,13 @@ class Game(object):
         self.roundList = RoundList()
         self.round = 1
         self._rawQueue = self.roundList.getList(self.round)
-        self.dotQueue = [y for x,y in self._rawQueue]
-        self.timeQueue = [x for x,y in self._rawQueue]
+        print(self._rawQueue)
+        self.dotQueue = [x for x,y in self._rawQueue]
+        self.timeQueue = [y for x,y in self._rawQueue]
         self.queueI = 0
         self.dList = []
         self.tList = []
-        self.wallet = 100
+        self.wallet = 10000
         self.inflation = 1
         self.time = 0
 
@@ -469,19 +475,6 @@ class Game(object):
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     quit()
-                elif event.type == pygame.KEYDOWN:
-                    parameter = list(self.points)
-                    if   event.key == pygame.K_1: self.dList.append(Dot(self,parameter,.1))
-                    elif event.key == pygame.K_2: self.dList.append(Dot(self,parameter,.2))
-                    elif event.key == pygame.K_3: self.dList.append(Dot(self,parameter,.3))
-                    elif event.key == pygame.K_4: self.dList.append(Dot(self,parameter,.4))
-                    elif event.key == pygame.K_5: self.dList.append(Dot(self,parameter,.5))
-                    elif event.key == pygame.K_6: self.dList.append(Dot(self,parameter,.6))
-                    elif event.key == pygame.K_7: self.dList.append(Dot(self,parameter,.7))
-                    elif event.key == pygame.K_8: self.dList.append(Dot(self,parameter,.8))
-                    elif event.key == pygame.K_9: self.dList.append(Dot(self,parameter,.9))
-                    elif event.key == pygame.K_b: shoot(self.tList)
-                    else: self.dList.append(Dot(self,parameter,3))
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if turret == True:
                         turret = False
@@ -514,11 +507,13 @@ class Game(object):
                 elif self.dotQueue[self.queueI] == "s": self.dList.append(StrongDot(self, parameter))
                 self.queueI += 1
                 if self.queueI == len(self.timeQueue):
+                    # new round
                     self.round += 1
+                    self.queueI = 0
                     if self.round == 5: self.displayWin()
                     self._rawQueue = self.roundList.getList(self.round)
-                    self.dotQueue = [y for x,y in self._rawQueue]
-                    self.timeQueue = [x for x,y in self._rawQueue]
+                    self.dotQueue = [x for x,y in self._rawQueue]
+                    self.timeQueue = [y for x,y in self._rawQueue]
             pygame.draw.lines(gameDisplay, (0,255,255), False, pointList, 6)
             if turret == True: t1.display(pygame.mouse.get_pos())
             for thing in self.tList:
