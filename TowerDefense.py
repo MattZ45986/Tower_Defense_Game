@@ -387,12 +387,12 @@ class RoundList(object):
         listy += self.f(500, 15, 15)
         return listy
     def getRound7(self):
-        listy = self.r(100, 40, 10)
-        listy += self.f(500, 15, 15)
+        listy = self.s(100, 40, 10)
+        listy += self.r(500, 15, 15)
         return listy
     def getRound8(self):
-        listy = self.r(100, 40, 10)
-        listy += self.f(500, 15, 15)
+        listy = self.r(100, 40, 5)
+        listy += self.f(350, 15, 15)
         return listy
     def getRound9(self):
         listy = self.r(100, 40, 10)
@@ -462,7 +462,7 @@ class Game(object):
         self.queueI = 0
         self.dList = []
         self.tList = []
-        self.wallet = 10000
+        self.wallet = 1000
         self.inflation = 1
         self.time = 0
 
